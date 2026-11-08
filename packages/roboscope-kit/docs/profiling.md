@@ -1,6 +1,6 @@
 # RoboScope Kit Profiling
 
-Updated: 2026-11-07
+Updated: 2026-11-09
 
 This document explains how to use `--profile` to see where an evaluation's time goes, and records what
 profiling has found so far. After every profiling run, add its findings to the benchmark's own documentation and link them from
@@ -104,6 +104,13 @@ these timers do not establish verified Nsight hardware coverage.
 Each benchmark keeps its profiling findings in its own documentation, newest first, with the date, machine,
 configuration, and Kit version:
 
+- [RoboCasa365 slot concurrency pilot](https://github.com/MINT-SJTU/RoboScope-Kit/blob/main/benchmarks/robocasa365/slot-concurrency-20261109.md):
+  three fixed K=4/G=2 pairs measured a 1.965× median formal throughput ratio;
+  separate autotune runs measured 2.075×. The first fixed pair reduced recurring
+  step/barrier intervals 3.66× while increasing Policy RPC wait and memory use
+  (2026-11-09, RTX 4090, 12-core quota, Kit b34/b35, MPS, six tasks × five slots,
+  shared 128-step cap). Worker wall timers and device-wide GPU samples support
+  this pilot; full-workload throughput and Nsight hardware coverage remain unverified.
 - [RoboCasa365 integration readiness](https://github.com/MINT-SJTU/RoboScope-Kit/blob/main/benchmarks/robocasa365/validation-20261107.md):
   native stepping/observations were the largest Worker interval in a five-slot Kettle
   smoke (2026-11-07, RTX 4090, Kit b35, K=1/G=1).

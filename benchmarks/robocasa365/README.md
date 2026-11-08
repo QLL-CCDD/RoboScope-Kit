@@ -104,10 +104,16 @@ native group's rollout after environment resets, excluding process/model/
 environment startup and the independent Policy Server's GPU execution. Nsight
 hardware capture and isolated server GPU timing remain unverified.
 
-This integration claims no speedup, unchanged success rate, full-suite result or
-full native equivalence. A self-test, smoke group or exact first action chunk is
-insufficient. Keep model/task/scenario streams, horizons, native slot count, K/G
-and outputs fixed in later comparisons.
+The [slot-concurrency pilot](slot-concurrency-20261109.md) measured a **1.965×**
+fixed-K/G median throughput ratio over three pairs and **2.075×** after independent
+autotune, with MPS enabled. It covers six tasks, five slots and a shared 128-step
+cap; it does not establish the full-workload 2× target or unchanged success rate.
+The parallel arm reached 93.83 GiB cgroup memory under a 96 GiB limit, so the
+mode remains opt-in and needs explicit worker bounds and memory headroom.
+
+A self-test, smoke group or exact first action chunk does not establish full
+native equivalence. Keep model/task/scenario streams, horizons, native slot count,
+K/G and outputs fixed in later comparisons.
 
 ## Validation records
 
