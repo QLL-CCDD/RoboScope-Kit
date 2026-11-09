@@ -119,6 +119,16 @@ cap; it does not establish the full-workload 2× target or unchanged success rat
 The parallel arm reached 93.83 GiB cgroup memory under a 96 GiB limit, so the
 mode remains opt-in and needs explicit worker bounds and memory headroom.
 
+The [composite/reset follow-up](composite-reset-followup-20261109.md) covers four
+composite tasks with ten episodes each and a shared 128-step cap. Fixed K=2/G=1
+measured 2.380× and separate bounded autotune measured 2.325×, also choosing 2/1;
+each arm executed 40 episodes and 5,120 steps. Peak parallel cgroup memory was
+52.01 GiB. In a separate eight-reset-group check, anonymous memory grew from
+21.58 to 26.09 GiB in parallel mode and from 11.42 to 14.93 GiB serially; process
+cleanup released it, but a memory plateau remains unverified. That check also
+retains one initial-observation hash difference with matching initial physics
+and scenarios. These finite diagnostics do not establish native-horizon accuracy.
+
 A self-test, smoke group or exact first action chunk does not establish full
 native equivalence. Keep model/task/scenario streams, horizons, native slot count,
 K/G and outputs fixed in later comparisons.

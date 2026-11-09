@@ -104,6 +104,16 @@ these timers do not establish verified Nsight hardware coverage.
 Each benchmark keeps its profiling findings in its own documentation, newest first, with the date, machine,
 configuration, and Kit version:
 
+- [RoboCasa365 composite/reset follow-up](https://github.com/MINT-SJTU/RoboScope-Kit/blob/main/benchmarks/robocasa365/composite-reset-followup-20261109.md):
+  four composite tasks × ten episodes at a shared 128-step cap measured 2.380×
+  at fixed K=2/G=1 and 2.325× after independent tuning within K≤2/G≤1.
+  Mean GPU busy rose 10.66%→26.66% and peak cgroup memory 33.12→52.01 GiB in
+  the fixed pair. Eight consecutive reset groups retained the same five slot
+  processes, but anonymous memory grew 21.58→26.09 GiB in parallel mode;
+  process cleanup released it and a longer-lived memory plateau remains unverified
+  (2026-11-09, RTX 4090, 12-core quota, Kit b34/b35, MPS, source `43df866`/`e836f77`).
+  These are Worker wall timers and device-wide samples; official-workload accuracy,
+  the full ≥2× target and Nsight hardware coverage remain unverified.
 - [RoboCasa365 slot concurrency pilot](https://github.com/MINT-SJTU/RoboScope-Kit/blob/main/benchmarks/robocasa365/slot-concurrency-20261109.md):
   three fixed K=4/G=2 pairs measured a 1.965× median formal throughput ratio;
   separate autotune runs measured 2.075×. The first fixed pair reduced recurring
