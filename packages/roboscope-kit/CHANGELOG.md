@@ -2,7 +2,7 @@
 
 Platform-only release notes from earlier versions are omitted; other changes relevant to the Kit are retained.
 
-## 0.8.0b35 - 2026-11-09
+## 0.8.0b35 - 2026-11-10
 
 - Add opt-in concurrent execution of RoboCasa365's five native simulator slots. Persistent child
   processes keep the per-slot reset stream and join at every existing action-chunk boundary.
@@ -10,7 +10,7 @@ Platform-only release notes from earlier versions are omitted; other changes rel
   with one deadline covering sends and complete replies, including partial headers/bodies, and bound
   graceful shutdown before killing and reaping stalled children.
 
-## 0.8.0b34 - 2026-11-09
+## 0.8.0b34 - 2026-11-10
 
 - Add the RoboCasa365 multi-task adapter, native five-slot evaluation groups, pinned simulator/assets,
   and official Diffusion Policy example. Freeze all 50 tasks, horizons, pretrain scenes and scoring.
