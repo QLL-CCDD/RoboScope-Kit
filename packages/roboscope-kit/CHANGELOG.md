@@ -2,6 +2,10 @@
 
 Platform-only release notes from earlier versions are omitted; other changes relevant to the Kit are retained.
 
+## 0.8.0b58 - 2026-11-11
+
+- Bound opt-in ManiSkill Jacobian graph ownership to two pure-geometry entries per Worker, retaining their static tensors across independent simulator groups while fully replacing joint inputs on every replay.
+
 ## 0.8.0b57 - 2026-11-11
 
 - Add a default-off, checksum-verified ManiSkill runtime patch that captures the unchanged inference Jacobian for the validated Panda and WidowX chain shapes, with independent output tensors and original-path fallbacks.

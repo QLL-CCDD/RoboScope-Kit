@@ -40,7 +40,7 @@ from pytorch_kinematics.jacobian import calc_jacobian
 from pytorch_kinematics.transforms import Transform3d
 from pytorch_kinematics.transforms.rotation_conversions import axis_and_angle_to_matrix_33
 
-PATCH_VERSION = "jacobian-cuda-graphs-v1"
+PATCH_VERSION = "jacobian-cuda-graphs-v2"
 SWITCH = "ROBOSCOPE_MANISKILL_JACOBIAN_GRAPHS"
 # Exactness probes cover these end links and batch widths. Other paths stay upstream.
 SUPPORTED_CHAINS = {
@@ -49,6 +49,9 @@ SUPPORTED_CHAINS = {
     ("1e8a73f270804dbcc32603d68a8fb5d34f57d109b30cc325ad89b36eecbb8506", "ee_gripper_link"):
         ("widowx_bridge", 6, 1),
 }
+# Kinematics is a pure function of joint values and pinned URDF geometry. Keep
+# at most two graph entries per Worker, independent of simulator/episode lifetime.
+_GRAPH_CACHE: OrderedDict[tuple[Any, ...], _GraphEntry] = OrderedDict()
 
 
 def _record(event: str, **fields: Any) -> None:
@@ -127,9 +130,12 @@ class _CaptureChain:
 
 
 class _GraphEntry:
-    """Own only graph buffers, never a chain/proxy or bound method reference."""
+    """Own static geometry and buffers; never reference a simulator or proxy."""
 
     def __init__(self, shadow: _CaptureChain, value: torch.Tensor) -> None:
+        # Captured kernels retain addresses, so their immutable geometry must live
+        # as long as the graph. The source chain was built only from the URDF.
+        self.geometry = shadow
         self.input = torch.empty_like(value)
         self.input.copy_(value)
         stream = torch.cuda.Stream(device=value.device)
@@ -152,11 +158,11 @@ class _GraphEntry:
 
 
 class _GraphedChain:
-    def __init__(self, chain: Any, scope: tuple[str, int, int]) -> None:
+    def __init__(self, chain: Any, scope: tuple[str, int, int], geometry_key: tuple[str, str]) -> None:
         self._chain = chain
         self._shadow = _CaptureChain(chain)
         self._scope = scope
-        self._graphs: OrderedDict[tuple[Any, ...], _GraphEntry] = OrderedDict()
+        self._geometry_key = geometry_key
 
     def __getattr__(self, name: str) -> Any:
         return getattr(self._chain, name)
@@ -166,15 +172,19 @@ class _GraphedChain:
         if (not isinstance(th, torch.Tensor) or th.device.type != "cuda" or th.requires_grad
                 or th.dtype != torch.float32 or th.dtype != self._chain.dtype
                 or th.device != self._chain.axes.device
+                or torch.is_autocast_enabled()
                 or th.ndim != 2 or tuple(th.shape) != (self._scope[2], self._scope[1])
                 or not th.is_contiguous() or locations is not None
                 or not isinstance(ret_eef_pose, bool) or set(kwargs) - {"ret_eef_pose"}):
             return self._chain.jacobian(th, locations=locations, **kwargs)
-        key = (th.device.type, th.device.index, th.dtype, tuple(th.shape))
+        key = (self._geometry_key, th.device.type, th.device.index, th.dtype, tuple(th.shape),
+               torch.backends.cuda.matmul.allow_tf32,
+               torch.get_float32_matmul_precision(), torch.is_inference_mode_enabled(),
+               torch.cuda.current_stream(th.device).cuda_stream)
         with torch.cuda.device(th.device):
             if torch.cuda.is_current_stream_capturing():
                 return self._chain.jacobian(th, locations=locations, **kwargs)
-            entry = self._graphs.get(key)
+            entry = _GRAPH_CACHE.get(key)
             if entry is None:
                 start = time.perf_counter()
                 allocated = torch.cuda.memory_allocated(th.device)
@@ -185,16 +195,16 @@ class _GraphedChain:
                     # Failed CUDA capture can invalidate the context; silently falling back is unsafe.
                     message = f"{PATCH_VERSION}: Jacobian capture failed for {self._scope}"
                     raise RuntimeError(message) from error
-                self._graphs[key] = entry
-                # Bound per-chain ownership; upstream global LRU caches see only the original chain.
-                if len(self._graphs) > 2:
-                    self._graphs.popitem(last=False)
+                _GRAPH_CACHE[key] = entry
+                # Every entry owns its static geometry; old environments can close.
+                if len(_GRAPH_CACHE) > 2:
+                    _GRAPH_CACHE.popitem(last=False)
                 _record("capture", chain=self._scope[0], shape=list(th.shape), dtype=str(th.dtype),
                         device=str(th.device), setup_cpu_wall_s=time.perf_counter()-start,
                         allocated_delta_bytes=torch.cuda.memory_allocated(th.device)-allocated,
                         reserved_delta_bytes=torch.cuda.memory_reserved(th.device)-reserved)
             else:
-                self._graphs.move_to_end(key)
+                _GRAPH_CACHE.move_to_end(key)
             return entry.replay(th, ret_eef_pose)
 
 
@@ -209,4 +219,4 @@ def maybe_graph_chain(chain: Any, *, urdf_path: str, end_link_name: str) -> Any:
     _record("configuration", requested=requested, eligible=scope is not None, enabled=enabled,
             urdf_sha256=digest, end_link=end_link_name, chain=scope[0] if scope else None,
             supported_batch=scope[2] if scope else None)
-    return _GraphedChain(chain, scope) if enabled else chain
+    return _GraphedChain(chain, scope, (digest, end_link_name)) if enabled else chain

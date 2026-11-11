@@ -89,11 +89,11 @@ if [[ ! -x "$ENV_PYTHON" ]]; then
   "$UV_BIN" venv --python "$PYTHON_BIN" "$ENV_PREFIX"
 fi
 "$ENV_PYTHON" -c 'import sys; assert sys.version_info[:3] == (3, 11, 15), sys.version'
-JACOBIAN_PATCH_VERSION="jacobian-cuda-graphs-v1"
+JACOBIAN_PATCH_VERSION="jacobian-cuda-graphs-v2"
 JACOBIAN_PATCH="$SCRIPT_DIR/patches/jacobian-cuda-graphs.patch"
 JACOBIAN_HELPER="$SCRIPT_DIR/patches/roboscope_jacobian.py"
 JACOBIAN_PATCH_SHA256="1f2314e6031b4d8e9dfb6b2d97290942eac32acbdee686b6f6595915b657152b"
-JACOBIAN_HELPER_SHA256="5c0220a93988faba006b20e0236333a54cc4a60cbcba1d81d339dfed3d10d154"
+JACOBIAN_HELPER_SHA256="bf0bc707f11b1d6e1a3456b13dba07740b3e605c76fc9fbc0694fe507ea2080d"
 KINEMATICS_ORIGINAL_SHA256="7f7a90a7c898e27a629618cbcc2b536d25feb9c8743c9e46b4882b8a39917e96"
 KINEMATICS_PATCHED_SHA256="dbf091eba7774660f8246eca6fdd33458d6fe5961d23d0d2865d0918c85df862"
 KINEMATICS_PATH="$SOURCE_ROOT/mani_skill/agents/controllers/utils/kinematics.py"
