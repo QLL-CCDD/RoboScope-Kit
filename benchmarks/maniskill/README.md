@@ -73,3 +73,6 @@ Additional real-model references document [Panda Octo](../../examples/maniskill/
 The [Fetch depth example](../../examples/maniskill/FETCH_MSHAB.md) supplies real MS-HAB Open
 weights and a native depth/contact adapter; original PartNet assets still block cabinet task runs.
 The [protocol](PROTOCOL.md) describes per-task coverage, metrics and timing boundaries.
+
+The optional [Jacobian graph runtime patch](JACOBIAN_GRAPHS.md) documents its
+validated shapes, original-path fallback, independent fixed-concurrency results and limits.

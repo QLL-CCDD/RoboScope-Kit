@@ -214,7 +214,7 @@ trigger another GPU run. The executed instrumentation hash is recorded separatel
 | Environment reuse with seeded reset | Earlier reported formal gain was 1.28x, dominated by repeated construction/cleanup; excluded from this sustained-runtime goal. |
 | IK tensor indexing | Earlier approximately 3.8% screen was unstable in warmed groups; rejected. |
 | GC freezing | No eligible sustained improvement established; not retained. |
-| Jacobian-only CUDA graph | Not implemented. Eligible profiles cover only 12.07% of the R12 matrix's enclosing step span; the actual Jacobian fraction is smaller. Bridge uses iterative target IK and does not enter that branch. |
+| Whole IK CUDA graph | Not implemented: fast-delta-only coverage is narrow and Bridge uses iterative target IK. The later pure Jacobian graph covers both measured branches; see the separate controlled results below. |
 | Feature packing / isolated synchronization | Insufficient measured budget. Removing all RollBall feature preparation caps rollout at 1.003x; all RPC removal caps it at 1.101x and includes inference. |
 | Bridge observation/physics audit | Its four R12 episodes require 30,000 physics microsteps, 300 native image/segmentation observations and 720 contact-pair queries. State fetch already occurs once per control, not once per microstep; background decoding is constructor-only. Dropping steps, segmentation, success queries or moving-camera updates changes the evaluation inputs/rules. |
 | CPU dispatcher 0 -> 2 | New controlled ABBA screen above: rejected at 0.842118x rollout throughput. |
@@ -227,12 +227,13 @@ feature preparation (0.52%). Bridge is 28.46% of that rollout. Even halving the
 entire Bridge step region would give only about 1.11x on this specific mix; a
 safe independent change with that gain has not been demonstrated.
 
-No additional runtime change with a stable, meaningful sustained gain was found
-in this bounded investigation beyond the already completed parallel/autotune
-work. This does not establish that future simulator changes are impossible.
-No performance patch or new performance PR is justified by these results, and
-issue #31's full-profile 2x target is not met. Integration correctness changes and
-new model-side references in #99 are excluded from performance gains.
+The initial bounded investigation rejected the lifecycle/dispatcher candidates above.
+A subsequent default-off pure Jacobian graph now passes a 20-episode screen and
+three 100-episode fixed K1/G1/N10 comparisons, with 1.1208x evaluation and 1.2664x
+rollout median throughput. See [implementation, complete metrics and correctness
+scope](JACOBIAN_GRAPHS.md). Its first per-environment capture design is retained
+as a failed 1.0072x screen. These results do not meet issue #31's full-profile 2x
+target; model-side and integration changes in #99 are excluded from the gains.
 
 ## Evidence
 

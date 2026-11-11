@@ -106,6 +106,12 @@ the findings below captures both Worker and Policy Server; its scope differs fro
 Each benchmark keeps its profiling findings in its own documentation, newest first, with the date, machine,
 configuration, and Kit version:
 
+- [ManiSkill Jacobian graph comparison](https://github.com/MINT-SJTU/RoboScope-Kit/blob/main/benchmarks/maniskill/JACOBIAN_GRAPHS.md):
+  the 21-24% Jacobian diagnosis motivates a default-off pure-geometry graph cache.
+  After a failed 1.0072x first design, three 100-episode RollBall K1/G1/N10 pairs
+  give 1.1208x evaluation / 1.2664x rollout median throughput, with exact records
+  and separate RollBall/WidowX trajectory checks. Full-profile 2x is not established
+  (2026-11-11, RTX 4090, Kit 0.8.0b58 candidate).
 - [ManiSkill](https://github.com/MINT-SJTU/RoboScope-Kit/blob/main/benchmarks/maniskill/RUNTIME_DIAGNOSTICS.md):
   external b55 RollBall/Bridge method diagnostics separate sustained PhysX submission/wait
   (42-45%) and complete Jacobian work (21-24%). Narrow FK/pose changes have modest ceilings;
