@@ -141,6 +141,71 @@ Step throughput is 0.847731x; second-group-only is 0.842638x. The setting is rej
 and was not expanded to 100 episodes. All four strict 20-record comparisons pass;
 no per-step trajectory equality is claimed for these untraced runs.
 
+## Granular sustained step diagnosis
+
+A second diagnostic uses b55 code `c660435b235cd9d3db303fcc3c14ee6beba1ebe1`
+from the fresh R16 builds. External process-local timers and cProfile wrap the
+original Worker without changing its calls, inputs, model or installed files.
+RollBall runs 20 episodes, seeds 0-19, N10, K1/G1 and the complete 80 ticks.
+It completes 1,600 lane steps with 12 successes; all 20 records match the earlier
+100-episode baseline's corresponding initial hashes, first actions, returns,
+successes and terminal masks. This is not a new per-step trajectory comparison.
+One Bridge RGB task, `PutEggplantInBasketScene-v1`, runs a diagnostic 10-tick
+prefix at N1/K1/G1 with the real Octo checkpoint and original cameras, control
+and 120-tick horizon. It executes all 1,000 required physical microsteps.
+Both commands finish with zero missing/duplicate records, Worker failures or OOMs.
+
+The warmed windows are RollBall's second vector group and Bridge controls 3-9.
+Bridge's first two RPCs take 8.918/9.159 s, including compilation; these cold
+requests are excluded from its sustained budget. The Bridge denominator sums
+step, RPC and feature preparation and excludes remaining wrapper bookkeeping.
+It is a slightly smaller diagnostic denominator, not a full-episode wall clock.
+
+| Nonoverlapping region | RollBall s / % | Bridge s / % |
+|---|---:|---:|
+| PhysX native step | 0.872981 / 42.218 | 1.302472 / 45.443 |
+| Controller action and IK | 0.766214 / 37.055 | 0.862865 / 30.105 |
+| Other step-action work | 0.023805 / 1.151 | 0.019834 / 0.692 |
+| Info / success evaluation | 0.020385 / 0.986 | 0.020643 / 0.720 |
+| Observation / rendering APIs | 0.042623 / 2.061 | 0.037901 / 1.322 |
+| Reward and base-step bookkeeping | 0.056312 / 2.723 | 0.001438 / 0.050 |
+| Policy RPC | 0.236161 / 11.421 | 0.612063 / 21.355 |
+| Feature preparation | 0.009850 / 0.476 | 0.008952 / 0.312 |
+| Vector wrapper and remaining loop | 0.039448 / 1.908 | outside denominator |
+| **Budget** | **2.067778 / 100** | **2.866168 / 100** |
+
+The enclosing PhysX wall time includes native submission, blocking
+`fetchResults(true)`, GPU work and scheduling wait. Process CPU time is close
+to wall time, but native busy polling also consumes CPU; this does not establish
+that the region is CPU arithmetic. State fetch already occurs once per control,
+not per microstep. Its share is only 0.333% / 0.033%. Rendering APIs may be
+asynchronous and do not isolate Vulkan GPU duration. Required microsteps,
+reward side effects, contacts, segmentation and success checks remain necessary.
+
+Inside the controller row, the complete Jacobian including FK takes
+0.504775 / 0.600096 s, or 24.411% / 20.937% of these windows. Its second FK
+alone covers only 7.791% / 7.234%; even a 2x regional improvement caps the
+overall gain near 1.041x / 1.038x. Avoiding unused fast-delta target-pose work
+is RollBall-specific and has a 1.045x ceiling at 2x regional improvement.
+Bridge's linear solve and RGB compositor cover only 0.539% and 0.057%.
+Those narrow changes are not implemented. The complete Jacobian remains a
+larger candidate requiring an exact implementation and untraced real screening.
+
+The diagnostic commands take 15.332 / 65.214 s total and 8.629 / 31.054 s
+evaluation. Device-wide mean GPU busy is 13.952% / 7.338%, mean/peak VRAM
+2.296/3.850 / 2.507/5.195 GiB, and accounted CPU 0.931 / 0.943 core.
+These instrumented short-run values are not formal performance comparisons.
+SM/Tensor/RT counters remain unavailable under the previously verified permission
+restriction; queue-only wait, server GPU latency and isolated Vulkan time remain N/A.
+
+The immutable diagnostic archive is
+`issue31-step-breakdown-20261111-evidence.tar.gz`, 749,766 bytes, SHA-256
+`d46f6fd9db2714c555a3bb6e040672ee895eac09360800e2686107f5b7792977`.
+An independent CPU audit verifies 43 payload files, record identities, 800/1,000
+rollout PhysX calls and 160/147 Jacobians. An exit-only metadata callback fails
+after complete JSONL/pstats are saved; this is retained explicitly and did not
+trigger another GPU run. The executed instrumentation hash is recorded separately.
+
 ## Review of other candidates
 
 | Candidate | Evidence and decision |

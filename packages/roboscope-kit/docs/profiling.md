@@ -107,6 +107,10 @@ Each benchmark keeps its profiling findings in its own documentation, newest fir
 configuration, and Kit version:
 
 - [ManiSkill](https://github.com/MINT-SJTU/RoboScope-Kit/blob/main/benchmarks/maniskill/RUNTIME_DIAGNOSTICS.md):
+  external b55 RollBall/Bridge method diagnostics separate sustained PhysX submission/wait
+  (42-45%) and complete Jacobian work (21-24%). Narrow FK/pose changes have modest ceilings;
+  these instrumented budgets establish no speedup (2026-11-11, RTX 4090, Kit 0.8.0b55 candidate).
+- [ManiSkill CUDA and dispatcher screen](https://github.com/MINT-SJTU/RoboScope-Kit/blob/main/benchmarks/maniskill/RUNTIME_DIAGNOSTICS.md):
   RollBall K1/G1/N10 reproduction and separate Worker/Policy CUDA trace identify step/observation
   work as 89.53% of rollout. CPU dispatcher workers 0 -> 2 slow sustained rollout to 0.8421x and
   are rejected. Actual counter access fails `ERR_NVGPUCTRPERM`; SM/Tensor/RT remain unavailable

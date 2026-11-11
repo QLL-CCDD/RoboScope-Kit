@@ -2,6 +2,10 @@
 
 Platform-only release notes from earlier versions are omitted; other changes relevant to the Kit are retained.
 
+## 0.8.0b57 - 2026-11-11
+
+- Add a default-off, checksum-verified ManiSkill runtime patch that captures the unchanged inference Jacobian for the validated Panda and WidowX chain shapes, with independent output tensors and original-path fallbacks.
+
 ## 0.8.0b55 - 2026-11-11
 
 - Include vector width in opt-in Worker recycling so ManiSkill tail batches start in a fresh simulator process while retaining the Policy replica.
