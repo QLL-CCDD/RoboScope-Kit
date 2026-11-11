@@ -243,6 +243,12 @@ native comparison. Runtime pins, assets and acceptance results are in the
 
 ## Additional real-policy references
 
+The [LiftCube actor prior](LIFTCUBE.md) targets the existing canonical LiftPeg4
+profile through `liftcube_prior_state_v1`. It retains the authors' complete
+42D state input and active learned gripper, with explicit actor-mean mode,
+EE-to-root conversion and two-tick action holds. R17/b56 full N1 and N2 prefix
+SDK/native checks pass, including groups 2,2,1, with zero differences/failures/OOMs.
+
 Task-specific [NEWT priors](NEWT.md) cover six control tasks, PlaceSphere, PickSingleYCB and a
 separate PullCubeTool pose profile. Explicit transfer references are available for
 [HORA Allegro](hora_policy.md), [TriFinger](trifinger_policy.md), [ROBEL DClaw](robel_policy.md),
@@ -270,6 +276,6 @@ directories to `compare_native.py`. A diagnostic manifest can set
 All such prefixes are labeled non-formal. See [the completion report](../../benchmarks/maniskill/COMPLETION_VALIDATION.md)
 for the measured commands, coverage and unresolved asset/model gates.
 The [native-reference review](../../benchmarks/maniskill/NATIVE_REVIEW_VALIDATION.md) records
-terminal-mask fixes, passing R12/R13/R16 cohorts and retained R11/R14/R15/HORA failures.
-Cumulative compared coverage is 74 profiles / 51 task IDs across those source snapshots;
+terminal-mask fixes, passing R12/R13/R16/R17 cohorts and retained R11/R14/R15/HORA failures.
+Cumulative compared coverage is 75 profiles / 51 task IDs across those source snapshots;
 historical 100-episode-per-task evidence retains its original source identity.

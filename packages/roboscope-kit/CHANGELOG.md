@@ -10,6 +10,11 @@ Platform-only release notes from earlier versions are omitted; other changes rel
 
 - Add a default-off, checksum-verified ManiSkill runtime patch that captures the unchanged inference Jacobian for the validated Panda and WidowX chain shapes, with independent output tensors and original-path fallbacks.
 
+## 0.8.0b56 - 2026-11-11
+
+- Add a pinned TD-MPC2 LiftCube actor-mean prior for the existing 32D-state/4D-action LiftPeg profile, retaining every original tensor and the learned active gripper output.
+- Preserve the complete source action for two native ticks, remapping its EE-frame translation with each measured TCP pose and documenting native component saturation separately from inference parity.
+
 ## 0.8.0b55 - 2026-11-11
 
 - Include vector width in opt-in Worker recycling so ManiSkill tail batches start in a fresh simulator process while retaining the Policy replica.
